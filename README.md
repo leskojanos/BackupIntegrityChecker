@@ -111,6 +111,7 @@ if ($LASTEXITCODE -eq 2) {
 }
 
 ```
+```markdown
 ## ⚙️ Command Line Options
 
 | Flag | Description |
@@ -124,4 +125,15 @@ if ($LASTEXITCODE -eq 2) {
 | `-j`, `--json` | Structured JSON output for machine processing. |
 
 ```
+```markdown
+## 🚦 Exit Codes (Error Levels)
 
+The program returns specific exit codes (`%ERRORLEVEL%` in CMD, `$LASTEXITCODE` in PowerShell, or `$?` in Bash) to allow seamless flow control in automated backup pipelines:
+
+| Code | Meaning | Description |
+| --- | --- | --- |
+| `0` | **Success / No Changes** | Execution completed successfully, and the two directory states are completely identical. |
+| `1` | **Error** | An error occurred (e.g., invalid command-line parameters, missing directory, database connection or syntax failure). |
+| `2` | **Changes Detected** | Execution completed successfully, but differences (added, missing, or modified files) were found between the two states. |
+
+```
