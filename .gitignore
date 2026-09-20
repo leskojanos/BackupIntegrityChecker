@@ -1,0 +1,25 @@
+# CMake és build mappák
+build/
+out/
+.cmake/
+CMakeCache.txt
+CMakeFiles/
+
+# vcpkg
+vcpkg_installed/
+
+# IDE konfigurációk (Visual Studio, VS Code)
+.vs/
+.vscode/
+*.user
+
+# Tesztkörnyezet és adatbázisok
+teszt_mappa/
+mentesek/
+*.db
+*.db-journal
+
+# Archívumok és lefordított binárisok
+*.zip
+*.exe
+*.dll
