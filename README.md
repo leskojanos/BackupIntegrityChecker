@@ -1,3 +1,7 @@
+# Backup Integrity Checker
+
+A high-performance command-line interface (CLI) tool written in C++17 for capturing directory states and identifying differences (new, modified, and deleted files) between two states at lightning speed. The program utilizes an optimized SQLite database and multi-threaded MD5 hashing, allowing it to process tens of thousands of files in seconds. With its structured JSON output, it integrates perfectly into automated backup scripts (PowerShell, Bash).
+
 ## Basic Concept: The Importance of Step 0
 
 A reliable backup strategy is not just about copying files from point A to point B; it is about ensuring that the data you are about to back up is healthy and untampered. Performing an integrity check as "Step 0" before initiating the actual backup process is critical for several reasons:
@@ -6,11 +10,7 @@ A reliable backup strategy is not just about copying files from point A to point
 * **Early Warning System:** By identifying exactly which files have been altered, added, or deleted since the last snapshot, you gain immediate visibility into suspicious system activities, malware behaviors, or accidental bulk deletions before they become permanent.
 * **Targeted Synchronization:** Knowing the exact *delta* (the precise list of changes) allows your synchronization scripts to process only the files that actually need updating, avoiding blind full-directory overwrites and saving significant time and disk I/O.
 
-**Backup Integrity Checker** acts as this essential gatekeeper, verifying your directory's health and providing a machine-readable action list before a single byte gets transferred.
-
-# Backup Integrity Checker
-
-A high-performance command-line interface (CLI) tool written in C++17 for capturing directory states and identifying differences (new, modified, and deleted files) between two states at lightning speed. The program utilizes an optimized SQLite database and multi-threaded MD5 hashing, allowing it to process tens of thousands of files in seconds. With its structured JSON output, it integrates perfectly into automated backup scripts (PowerShell, Bash).
+** The solution: the Backup Integrity Checker** acts as this essential gatekeeper, verifying your directory's health and providing a machine-readable action list before a single byte gets transferred.
 
 ## 🚀 Key Features
 
