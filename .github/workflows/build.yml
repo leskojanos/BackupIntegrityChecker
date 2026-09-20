@@ -1,16 +1,18 @@
-name: Windows Build
+name: Auto Release on Tag
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-  workflow_dispatch: # Allows manual triggering from the Actions tab
+    tags:
+      - 'v*' # Lefut minden v0.1, v1.0 stb. tag beküldésekor
 
 jobs:
-  build:
-    name: Build on Windows
+  build_and_release:
+    name: Build and Release on Windows
     runs-on: windows-latest
+    
+    # Kötelező írási jog a Release létrehozásához
+    permissions:
+      contents: write 
 
     steps:
     - name: Checkout Code
@@ -20,7 +22,6 @@ jobs:
       run: vcpkg install sqlite3:x64-windows nlohmann-json:x64-windows
       
     - name: Configure CMake
-      # The GitHub runner automatically provides the VCPKG_INSTALLATION_ROOT variable
       run: >
         cmake -B build -S . 
         -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake"
@@ -28,9 +29,26 @@ jobs:
     - name: Build Project
       run: cmake --build build --config Release
 
-    - name: Upload Artifact (Binary)
-      uses: actions/upload-artifact@v4
+    - name: Projekt és forráskód becsomagolása ZIP-be
+      # PowerShell parancsok a dinamikus fájlnevek generálásához
+      run: |
+        # 1. A lefordított exe fájl becsomagolása
+        Compress-Archive -Path build\Release\backup_integrity_checker.exe -DestinationPath backup_integrity_checker_${{ github.ref_name }}.zip
+        
+        # 2. A tiszta forráskód becsomagolása egyedi néven
+        Compress-Archive -Path "include", "src", "CMakeLists.txt", "README.md", "build.bat" -DestinationPath backup_integrity_checker_${{ github.ref_name }}_source.zip
+
+    - name: GitHub Release létrehozása és aszet feltöltése
+      uses: softprops/action-gh-release@v1
       with:
-        name: BackupIntegrityChecker-Windows-x64
-        path: build/Release/backup_integrity_checker.exe
-        if-no-files-found: error
+        # Mindkét egyedileg elnevezett fájlt feltöltjük
+        files: |
+          backup_integrity_checker_${{ github.ref_name }}.zip
+          backup_integrity_checker_${{ github.ref_name }}_source.zip
+        name: "Backup Integrity Checker ${{ github.ref_name }}"
+        body: |
+          ### Automatikus kiadás
+          - **Verzió:** ${{ github.ref_name }}
+          - **Commit:** ${{ github.sha }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

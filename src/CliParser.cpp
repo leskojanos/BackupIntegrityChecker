@@ -29,7 +29,7 @@ CliOptions CliParser::parse(int argc, char* argv[]) {
             if (i + 1 < argc) {
                 opts.output_dir = argv[++i];
             } else {
-                opts.error_message = "A '-o' parameter utan meg kell adni a mentesi konyvtarat!";
+                opts.error_message = "Error: Output directory must be specified after '-o'!";
                 return opts;
             }
         } else {
@@ -38,9 +38,9 @@ CliOptions CliParser::parse(int argc, char* argv[]) {
     }
 
     if (opts.positional_args.empty()) {
-        opts.error_message = "Hianyzo konyvtar- vagy adatbazis-parameter!";
+        opts.error_message = "Error: Missing directory or database parameter!";
     } else if (opts.mode == AppMode::Compare && opts.positional_args.size() != 2) {
-        opts.error_message = "Az osszehasonlitashoz pontosan ket adatbazisfajl (.db) szukseges!";
+        opts.error_message = "Error: Exactly two database files (.db) are required for comparison!";
     }
 
     return opts;
@@ -48,19 +48,19 @@ CliOptions CliParser::parse(int argc, char* argv[]) {
 
 void CliParser::print_usage() {
     std::cout << "==========================================================\n"
-              << "       BACKUP INTEGRITY CHECKER - Hasznalati utmutato     \n"
+              << "       BACKUP INTEGRITY CHECKER - Usage Guide             \n"
               << "==========================================================\n\n"
-              << "1. SZKENNELES MOD (Parhuzamositott tobbmagos feldolgozas)\n"
-              << "   Hasznalat: backup_integrity_checker.exe <forras_mappa> [-o <kimeneti_mappa>]\n\n"
-              << "2. OSSZEHASONLITO MOD (Ketlepcsos optimalizalt diff)\n"
-              << "   Hasznalat: backup_integrity_checker.exe -c <regi.db> <uj.db> [Kimeneti_Opciok]\n"
-              << "   Példa: backup_integrity_checker.exe -cv -f alap.db uj.db\n\n"
-              << "OPCIOK:\n"
-              << "   -o <mappa>       Kimeneti konyvtar mentesehez.\n"
-              << "   -c               Osszehasonlito mod.\n"
-              << "   -f, --full-check Teljes hash ellenorzes kenyszeritese (szigoru MD5 diff).\n"
-              << "   -v, --verbose    Reszletes vizualis konzolkimenet.\n"
-              << "   -p, --plain      Szkript-barat listaskimenet (AKCIO|PATH).\n"
-              << "   -j, --json       Strukturalt JSON kimenet gepi feldolgozashoz.\n"
-              << "   -h, --help       Megjeleniti ezt a leirast.\n";
+              << "1. SCAN MODE (Parallel multi-threaded processing)\n"
+              << "   Usage: backup_integrity_checker.exe <source_folder> [-o <output_folder>]\n\n"
+              << "2. COMPARE MODE (Optimized two-phase diff)\n"
+              << "   Usage: backup_integrity_checker.exe -c <old.db> <new.db> [Output_Options]\n"
+              << "   Example: backup_integrity_checker.exe -cv -f base.db new.db\n\n"
+              << "OPTIONS:\n"
+              << "   -o <folder>      Specify the output directory for scanning.\n"
+              << "   -c               Enable Compare (diff) mode.\n"
+              << "   -f, --full-check Force full MD5 hash check (ignores size-based pre-filtering).\n"
+              << "   -v, --verbose    Detailed visual console output (dates, sizes, hashes).\n"
+              << "   -p, --plain      Script-friendly, simple list output (ACTION|PATH).\n"
+              << "   -j, --json       Structured JSON output for machine processing.\n"
+              << "   -h, --help       Display this usage guide.\n";
 }

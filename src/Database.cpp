@@ -65,3 +65,4 @@ bool Database::save_records(const std::vector<FileRecord>& records) {
     sqlite3_exec(db_handle_, "COMMIT;", nullptr, nullptr, nullptr);
     return true;
 }
+

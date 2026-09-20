@@ -35,10 +35,10 @@ std::vector<ModifiedFileRecord> DbComparer::fetch_modified_records(sqlite3* db, 
             rec.old_md5 = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 5));
             rec.new_md5 = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 6));
 
-            if (rec.old_size != rec.new_size) rec.reason = "Meret valtozott";
-            else if (rec.old_md5 != rec.new_md5) rec.reason = "Tartalom valtozott (MD5)";
-            else if (rec.old_date != rec.new_date) rec.reason = "Datum valtozott";
-            else rec.reason = "Ismeretlen elteres";
+            if (rec.old_size != rec.new_size) rec.reason = "Size changed";
+            else if (rec.old_md5 != rec.new_md5) rec.reason = "Content changed (MD5)";
+            else if (rec.old_date != rec.new_date) rec.reason = "Date changed";
+            else rec.reason = "Unknown difference";
 
             records.push_back(std::move(rec));
         }
@@ -128,37 +128,37 @@ void DbComparer::print_results(const ComparisonResult& res, bool verbose, bool p
     }
 
     std::cout << std::string(60, '-') << "\n"
-              << "OSSZEHASONLITAS EREDMENYE (SQLite Engine)\n"
+              << "COMPARISON RESULT (SQLite Engine)\n"
               << std::string(60, '-') << "\n";
               
     if (res.empty()) {
-        std::cout << "\xE2\x9C\x85 A ket allapot teljesen megegyezik! Nincs valtozas.\n";
+        std::cout << "\xE2\x9C\x85 The two states are identical! No changes.\n";
         return;
     }
     if (!res.missing.empty()) {
-        std::cout << "\xE2\x9D\x8C HIANYZO FAJLOK (" << res.missing.size() << " db):\n";
+        std::cout << "\xE2\x9D\x8C MISSING FILES (" << res.missing.size() << "):\n";
         for (const auto& f : res.missing) {
             std::cout << "   - " << f.path << "\n";
-            if (verbose) std::cout << "       [Meret: " << f.size << " byte | MD5: " << f.md5_checksum << "]\n";
+            if (verbose) std::cout << "       [Size: " << f.size << " bytes | MD5: " << f.md5_checksum << "]\n";
         }
         std::cout << "\n";
     }
     if (!res.modified.empty()) {
-        std::cout << "\xE2\x9A\xA0\xEF\xB8\x8F MODOSULT FAJLOK (" << res.modified.size() << " db):\n";
+        std::cout << "\xE2\x9A\xA0\xEF\xB8\x8F MODIFIED FILES (" << res.modified.size() << "):\n";
         for (const auto& f : res.modified) {
             std::cout << "   - " << f.path << " (" << f.reason << ")\n";
             if (verbose) {
-                std::cout << "       [Meret: " << f.old_size << " -> " << f.new_size << " byte"
+                std::cout << "       [Size: " << f.old_size << " -> " << f.new_size << " bytes"
                           << " | MD5: " << f.old_md5 << " -> " << f.new_md5 << "]\n";
             }
         }
         std::cout << "\n";
     }
     if (!res.added.empty()) {
-        std::cout << "\xE2\x9E\x95 UJ FAJLOK (" << res.added.size() << " db):\n";
+        std::cout << "\xE2\x9E\x95 ADDED FILES (" << res.added.size() << "):\n";
         for (const auto& f : res.added) {
             std::cout << "   - " << f.path << "\n";
-            if (verbose) std::cout << "       [Meret: " << f.size << " byte | MD5: " << f.md5_checksum << "]\n";
+            if (verbose) std::cout << "       [Size: " << f.size << " bytes | MD5: " << f.md5_checksum << "]\n";
         }
         std::cout << "\n";
     }
@@ -168,21 +168,21 @@ int DbComparer::execute(const std::string& old_db_path, const std::string& new_d
                         bool verbose, bool full_check, bool plain_output, bool json_output) {
                             
     if (!plain_output && !json_output) {
-        std::cout << "Adatbazisok csatolasa...\n Regi: " << old_db_path << "\n Uj:   " << new_db_path << "\n";
-        if (full_check) std::cout << "Mod: Teljes MD5 ellenorzes (--full-check)\n\n";
-        else std::cout << "Mod: Gyors ketlepcsos integritas-ellenorzes\n\n";
+        std::cout << "Attaching databases...\n Old: " << old_db_path << "\n New: " << new_db_path << "\n";
+        if (full_check) std::cout << "Mode: Full MD5 check (--full-check)\n\n";
+        else std::cout << "Mode: Fast two-phase integrity check\n\n";
     }
 
     sqlite3* db = nullptr;
     if (sqlite3_open(old_db_path.c_str(), &db) != SQLITE_OK) {
-        if (!plain_output && !json_output) std::cerr << "Hiba a regi adatbazis megnyitasakor: " << sqlite3_errmsg(db) << "\n";
+        if (!plain_output && !json_output) std::cerr << "Error opening old database: " << sqlite3_errmsg(db) << "\n";
         return 1;
     }
     
     const std::string attach_sql = "ATTACH DATABASE '" + new_db_path + "' AS new_db;";
     char* err_msg = nullptr;
     if (sqlite3_exec(db, attach_sql.c_str(), nullptr, nullptr, &err_msg) != SQLITE_OK) {
-        if (!plain_output && !json_output) std::cerr << "Hiba az uj adatbazis csatolasakor: " << err_msg << "\n";
+        if (!plain_output && !json_output) std::cerr << "Error attaching new database: " << err_msg << "\n";
         sqlite3_free(err_msg);
         sqlite3_close(db);
         return 1;

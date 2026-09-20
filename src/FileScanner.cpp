@@ -48,7 +48,7 @@ std::string FileScanner::generate_timestamped_filename(const std::string& prefix
 }
 
 std::vector<FileRecord> FileScanner::scan_directory_multithreaded(const fs::path& root_path) {
-    std::cout << "[1/2] Fajlrendszer metaadatainak felterkepezese...\n";
+    std::cout << "[1/2] Scanning file system metadata...\n";
     
     struct PendingItem {
         fs::path path;
@@ -70,15 +70,15 @@ std::vector<FileRecord> FileScanner::scan_directory_multithreaded(const fs::path
             item.mod_date = format_timestamp(entry.last_write_time());
             pending_items.push_back(std::move(item));
         } catch (const fs::filesystem_error& e) {
-            std::cerr << "\n[Figyelmeztetes] Metaadat-olvasas hiba: " << e.what() << "\n";
+            std::cerr << "\n[Warning] Metadata read error: " << e.what() << "\n";
         }
     }
 
     const size_t total_files = pending_items.size();
     const size_t num_threads = std::max(1u, std::thread::hardware_concurrency());
     
-    std::cout << "[2/2] Parhuzamos MD5 szamitas " << num_threads << " szalon (" 
-              << total_files << " fajl)...\n";
+    std::cout << "[2/2] Parallel MD5 calculation on " << num_threads << " threads (" 
+              << total_files << " files)...\n";
 
     ThreadPool pool(num_threads);
     std::vector<std::future<FileRecord>> futures;
@@ -97,7 +97,7 @@ std::vector<FileRecord> FileScanner::scan_directory_multithreaded(const fs::path
 
             const size_t current = ++processed_count;
             if (current % 1000 == 0 || current == total_files) {
-                std::cout << "\rFeldolgozva: " << current << " / " << total_files 
+                std::cout << "\rProcessed: " << current << " / " << total_files 
                           << " (" << (current * 100 / total_files) << "%)" << std::flush;
             }
             return rec;
