@@ -10,7 +10,9 @@ A reliable backup strategy is not just about copying files from point A to point
 * **Early Warning System:** By identifying exactly which files have been altered, added, or deleted since the last snapshot, you gain immediate visibility into suspicious system activities, malware behaviors, or accidental bulk deletions before they become permanent.
 * **Targeted Synchronization:** Knowing the exact *delta* (the precise list of changes) allows your synchronization scripts to process only the files that actually need updating, avoiding blind full-directory overwrites and saving significant time and disk I/O.
 
-## The solution: Backup Integrity Checker** acts as this essential gatekeeper, verifying your directory's health and providing a machine-readable action list before a single byte gets transferred.
+## The solution: Backup Integrity Checker
+
+It acts as this essential gatekeeper, verifying your directory's health and providing a machine-readable action list before a single byte gets transferred.
 
 ## 🚀 Key Features
 
