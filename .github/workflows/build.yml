@@ -33,7 +33,7 @@ jobs:
       # PowerShell parancsok a dinamikus fájlnevek generálásához
       run: |
         # 1. A lefordított exe fájl becsomagolása
-        Compress-Archive -Path build\Release\backup_integrity_checker.exe -DestinationPath backup_integrity_checker_${{ github.ref_name }}.zip
+        Compress-Archive -Path build\Release\backup_integrity_checker.exe -DestinationPath backup_integrity_checker_${{ github.ref_name }}_binary.zip
         
         # 2. A tiszta forráskód becsomagolása egyedi néven
         Compress-Archive -Path "include", "src", "CMakeLists.txt", "README.md", "build.bat" -DestinationPath backup_integrity_checker_${{ github.ref_name }}_source.zip
@@ -43,7 +43,7 @@ jobs:
       with:
         # Mindkét egyedileg elnevezett fájlt feltöltjük
         files: |
-          backup_integrity_checker_${{ github.ref_name }}.zip
+          backup_integrity_checker_${{ github.ref_name }}_binary.zip
           backup_integrity_checker_${{ github.ref_name }}_source.zip
         name: "Backup Integrity Checker ${{ github.ref_name }}"
         body: |
